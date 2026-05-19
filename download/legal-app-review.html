@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>مراجعة تطبيق المحلل القانوني المصري</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  @page {
+    size: 210mm 297mm;
+    margin: 18mm 20mm 20mm 20mm;
+  }
+  @page cover {
+    margin: 0;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 210mm;
+    background: #ffffff;
+    font-family: 'Tajawal', 'Noto Sans Arabic', 'DejaVu Sans', sans-serif;
+    color: #1a1a2e;
+    font-size: 11pt;
+    line-height: 1.85;
+    direction: rtl;
+  }
+
+  /* Cover page */
+  .cover-page {
+    width: 210mm;
+    min-height: 297mm;
+    background: linear-gradient(160deg, #0a1428 0%, #16294f 50%, #0f1d3a 100%);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    page-break-after: always;
+    margin: -18mm -20mm 0 -20mm;
+    padding: 18mm 20mm;
+    box-sizing: border-box;
+  }
+  .cover-page::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -30%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .cover-page::after {
+    content: '';
+    position: absolute;
+    bottom: -40%;
+    left: -20%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .cover-icon {
+    font-size: 60px;
+    margin-bottom: 24px;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+  }
+  .cover-title {
+    font-family: 'Amiri', serif;
+    font-size: 36pt;
+    font-weight: 700;
+    color: #d4af37;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+    line-height: 1.4;
+  }
+  .cover-subtitle {
+    font-size: 16pt;
+    color: #93b4d8;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+    font-weight: 300;
+  }
+  .cover-meta {
+    font-size: 11pt;
+    color: #7a9bbd;
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid rgba(212,175,55,0.3);
+    padding-top: 20px;
+    margin-top: 20px;
+  }
+  .cover-badge {
+    display: inline-block;
+    background: rgba(212,175,55,0.15);
+    color: #d4af37;
+    border: 1px solid rgba(212,175,55,0.4);
+    padding: 6px 20px;
+    border-radius: 20px;
+    font-size: 10pt;
+    margin-top: 16px;
+  }
+
+  /* Body pages */
+  .body-content {
+    padding: 0;
+  }
+
+  h1 {
+    font-family: 'Amiri', serif;
+    font-size: 22pt;
+    font-weight: 700;
+    color: #0a1428;
+    border-bottom: 3px solid #d4af37;
+    padding-bottom: 8px;
+    margin-top: 36px;
+    margin-bottom: 18px;
+  }
+  h2 {
+    font-family: 'Amiri', serif;
+    font-size: 16pt;
+    font-weight: 700;
+    color: #16294f;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    padding-right: 14px;
+    border-right: 4px solid #d4af37;
+  }
+  h3 {
+    font-size: 13pt;
+    font-weight: 700;
+    color: #1e3a6b;
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+
+  p {
+    margin-bottom: 12px;
+    text-align: justify;
+  }
+
+  .rating-box {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border: 2px solid #d4af37;
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 20px 0;
+  }
+  .rating-box h3 {
+    color: #0a1428;
+    margin-top: 0;
+    font-size: 14pt;
+  }
+  .rating-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #dee2e6;
+  }
+  .rating-item:last-child {
+    border-bottom: none;
+  }
+  .rating-label {
+    font-weight: 500;
+    color: #16294f;
+  }
+  .rating-value {
+    font-weight: 700;
+    padding: 3px 14px;
+    border-radius: 15px;
+    font-size: 10pt;
+  }
+  .rating-excellent { background: #d4edda; color: #155724; }
+  .rating-good { background: #d1ecf1; color: #0c5460; }
+  .rating-fair { background: #fff3cd; color: #856404; }
+  .rating-poor { background: #f8d7da; color: #721c24; }
+
+  .findings-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 10pt;
+  }
+  .findings-table th {
+    background: #0a1428;
+    color: #d4af37;
+    padding: 10px 14px;
+    text-align: right;
+    font-weight: 700;
+  }
+  .findings-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #dee2e6;
+    text-align: right;
+    vertical-align: top;
+  }
+  .findings-table tr:nth-child(even) td {
+    background: #f8f9fa;
+  }
+
+  .badge-critical {
+    display: inline-block;
+    background: #f8d7da;
+    color: #721c24;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 9pt;
+    font-weight: 700;
+  }
+  .badge-high {
+    display: inline-block;
+    background: #fff3cd;
+    color: #856404;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 9pt;
+    font-weight: 700;
+  }
+  .badge-medium {
+    display: inline-block;
+    background: #d1ecf1;
+    color: #0c5460;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 9pt;
+    font-weight: 700;
+  }
+  .badge-low {
+    display: inline-block;
+    background: #d4edda;
+    color: #155724;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 9pt;
+    font-weight: 700;
+  }
+
+  ul, ol {
+    padding-right: 24px;
+    margin-bottom: 14px;
+  }
+  li {
+    margin-bottom: 6px;
+  }
+
+  .highlight-box {
+    background: #fff8e1;
+    border-right: 5px solid #d4af37;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 8px 8px 0;
+  }
+  .highlight-box p {
+    margin-bottom: 6px;
+  }
+
+  .warning-box {
+    background: #fff3cd;
+    border-right: 5px solid #ffc107;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .danger-box {
+    background: #f8d7da;
+    border-right: 5px solid #dc3545;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .success-box {
+    background: #d4edda;
+    border-right: 5px solid #28a745;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 8px 8px 0;
+  }
+
+  code {
+    background: #e9ecef;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 10pt;
+    direction: ltr;
+    display: inline-block;
+  }
+  .code-block {
+    background: #1a1a2e;
+    color: #e0e0e0;
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 9.5pt;
+    direction: ltr;
+    text-align: left;
+    overflow-x: auto;
+    margin: 12px 0;
+    line-height: 1.6;
+  }
+
+  .toc {
+    page-break-after: always;
+    padding-top: 40px;
+  }
+  .toc h1 {
+    text-align: center;
+    border-bottom: none;
+    font-size: 24pt;
+    margin-bottom: 30px;
+  }
+  .toc-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px dotted #ccc;
+    font-size: 12pt;
+  }
+  .toc-item-main {
+    font-weight: 700;
+    color: #0a1428;
+  }
+  .toc-item-sub {
+    padding-right: 28px;
+    color: #333;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  /* Force better fill on thin pages */
+  .body-content h1 {
+    padding-top: 20px;
+  }
+  .body-content p {
+    margin-bottom: 14px;
+  }
+  .body-content ul, .body-content ol {
+    margin-bottom: 16px;
+  }
+  .body-content li {
+    margin-bottom: 8px;
+  }
+
+  .summary-score {
+    text-align: center;
+    margin: 30px 0;
+  }
+  .score-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0a1428, #1e3a6b);
+    color: #d4af37;
+    font-size: 36pt;
+    font-weight: 900;
+    font-family: 'Amiri', serif;
+  }
+  .score-label {
+    font-size: 13pt;
+    color: #666;
+    margin-top: 10px;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 9pt;
+    color: #999;
+    border-top: 1px solid #dee2e6;
+    padding-top: 12px;
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover-page">
+  <div class="cover-icon">&#9878;</div>
+  <div class="cover-title">تقرير مراجعة تطبيق<br/>المحلل القانوني المصري</div>
+  <div class="cover-subtitle">مراجعة شاملة للتصميم والكود والأمان والأداء</div>
+  <div class="cover-meta">
+    <p>تاريخ المراجعة: 20 مايو 2026</p>
+    <p>نسخة التطبيق: 2024/2025</p>
+    <p>نوع الملف: HTML ملف واحد (Single Page Application)</p>
+  </div>
+  <div class="cover-badge">مراجعة فنية شاملة</div>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+  <h1>فهرس المحتويات</h1>
+  <div class="toc-item toc-item-main"><span>1. نظرة عامة على التطبيق</span></div>
+  <div class="toc-item toc-item-sub"><span>1.1 الفكرة والهدف</span></div>
+  <div class="toc-item toc-item-sub"><span>1.2 التقنيات المستخدمة</span></div>
+  <div class="toc-item toc-item-main"><span>2. تصميم واجهة المستخدم (UI/UX)</span></div>
+  <div class="toc-item toc-item-sub"><span>2.1 نقاط القوة في التصميم</span></div>
+  <div class="toc-item toc-item-sub"><span>2.2 نقاط الضعف في التصميم</span></div>
+  <div class="toc-item toc-item-main"><span>3. هيكل الكود وجودته</span></div>
+  <div class="toc-item toc-item-sub"><span>3.1 نقاط القوة في الكود</span></div>
+  <div class="toc-item toc-item-sub"><span>3.2 نقاط الضعف في الكود</span></div>
+  <div class="toc-item toc-item-main"><span>4. قاعدة البيانات</span></div>
+  <div class="toc-item toc-item-sub"><span>4.1 التقييم الحالي</span></div>
+  <div class="toc-item toc-item-sub"><span>4.2 التوصيات</span></div>
+  <div class="toc-item toc-item-main"><span>5. الأمان والحماية</span></div>
+  <div class="toc-item toc-item-sub"><span>5.1 الثغرات الأمنية الحرجة</span></div>
+  <div class="toc-item toc-item-sub"><span>5.2 التوصيات الأمنية</span></div>
+  <div class="toc-item toc-item-main"><span>6. الأداء والتحسين</span></div>
+  <div class="toc-item toc-item-main"><span>7. إمكانية الوصول</span></div>
+  <div class="toc-item toc-item-main"><span>8. التكامل مع واجهات البرمجة (API)</span></div>
+  <div class="toc-item toc-item-main"><span>9. جدول النتائج والتوصيات</span></div>
+  <div class="toc-item toc-item-main"><span>10. الخلاصة والتقييم العام</span></div>
+</div>
+
+<!-- BODY CONTENT -->
+<div class="body-content">
+
+  <!-- SECTION 1 -->
+  <h1>1. نظرة عامة على التطبيق</h1>
+
+  <h2>1.1 الفكرة والهدف</h2>
+  <p>تطبيق "المحلل القانوني المصري" هو أداة ويب تفاعلية مصممة لمساعدة المحامين والباحثين القانونيين في تحليل المواد القانونية المصرية واستخراج الدفوع الشكلية والموضوعية والثغرات الإجرائية بالإضافة إلى مبادئ أحكام محكمة النقض المرتبطة بكل مادة. يقدم التطبيق أيضا ميزة صياغة مسودات مذكرات قانونية جاهزة للاقتباس، وهي ميزة عملية توفر وقتا كبيرا في إعداد المذكرات القانونية.</p>
+  <p>يستهدف التطبيق خمسة فروع قانونية رئيسية هي: قانون العقوبات، قانون الإجراءات الجنائية، القانون المدني، قانون المرافعات، وقانون الأحوال الشخصية. ويوفر لوحة إدارة لاستيراد النصوص القانونية الكاملة من مصادر خارجية عبر أداة Firecrawl مع إمكانية الاتصال بخدمات الذكاء الاصطناعي للتحليل المتقدم.</p>
+
+  <h2>1.2 التقنيات المستخدمة</h2>
+  <p>يعتمد التطبيق على بنية تقنية بسيطة تتكون من ملف HTML واحد يحتوي على جميع الأكواد المضمنة (CSS + JavaScript) مع استخدام مكتبة Tailwind CSS عبر CDN للتزيين، وخطوط Google Fonts (Tajawal و Amiri) للنصوص العربية. يتصل التطبيق بثلاث نقاط نهاية API وهي: <code>/api/public/article</code> لجلب نص المادة، و<code>/api/public/analyze</code> للتحليل بالذكاء الاصطناعي، و<code>/api/public/ingest-law</code> لاستيراد القوانين، بالإضافة إلى نقطة <code>/api/public/law-stats</code> لعرض إحصاءات قاعدة البيانات.</p>
+
+  <div class="highlight-box">
+    <p><strong>ملاحظة:</strong> التطبيق في حالته الحالية يُعد نموذجا أوليا (Prototype) يعتمد على بيانات ثابتة مدمجة في الكود مع استعداد للتكامل مع واجهات برمجة خلفية، لكنه ليس تطبيقا إنتاجيا جاهزا للاستخدام الفعلي دون تحسينات جوهرية.</p>
+  </div>
+
+  <!-- SECTION 2 -->
+  <h1>2. تصميم واجهة المستخدم (UI/UX)</h1>
+
+  <h2>2.1 نقاط القوة في التصميم</h2>
+  <p><strong>الهوية البصرية المتسقة:</strong> يتميز التطبيق بتصميم بصري متناسق يعكس الطابع القانوني الرسمي من خلال لوحة ألوان داكنة (كحلي/ذهبي) تمنح شعورا بالثقة والاحترافية. الألوان المستخدمة متجانسة ومتناسقة مع طبيعة التطبيق القانوني، حيث يرمز اللون الكحلي العميق للرسمية والجدية، بينما يضفي اللون الذهبي لمسة من الرفعة والمكانة. هذا الاختيار اللوني ناجح جدا في إيصال الانطباع المرغوب للمستخدم منذ اللحظة الأولى.</p>
+  <p><strong>دعم اللغة العربية:</strong> التطبيق يدعم الاتجاه من اليمين لليسار (RTL) بشكل صحيح عبر خاصية <code>dir="rtl"</code> و<code>lang="ar"</code>، مع استخدام خطوط عربية مناسبة (Tajawal للنصوص العامة وAmiri للعناوين). هذا يضمن عرضا سليما للمحتوى العربي دون مشاكل في محاذاة النص أو ترتيب العناصر. كما أن اختيار خط Amiri للعناوين يمنحها طابعا كلاسيكيا يتناسب مع الطبيعة القانونية للتطبيق.</p>
+  <p><strong>التصميم المتجاوب:</strong> يستخدم التطبيق شبكة Tailwind CSS المتجاوبة (grid system) مع فئات مثل <code>grid-cols-1</code> و<code>md:grid-cols-12</code> و<code>lg:grid-cols-2</code>، مما يضمن عرضا مناسبا على مختلف أحجام الشاشات من الهواتف المحمولة إلى الشاشات الكبيرة. هذا يعكس وعيا جيدا بضروبة التوافق مع أجهزة متعددة.</p>
+  <p><strong>التصنيف البصري الواضح:</strong> يستخدم التطبيق شارات ملونة (Badges) مميزة لكل نوع من أنواع الدفوع: الأزرق للدفوع الشكلية، البنفسجي للدفوع الموضوعية، الأحمر للثغرات، والذهبي لأحكام النقض. هذا الترميز اللوني يسهل على المستخدم التمييز السريع بين الفئات المختلفة ويحسن تجربة القراءة بشكل ملحوظ.</p>
+  <p><strong>الأمثلة السريعة:</strong> توفير أزرار أمثلة سريعة (عقوبات 17، إجراءات 304، مدني 163) يسهل على المستخدم الجيد استكشاف التطبيق فورا دون الحاجة لمعرفة أرقام المواد القانونية مسبقا، وهو ما يحسن تجربة المستخدم الأولية بشكل كبير.</p>
+
+  <h2>2.2 نقاط الضعف في التصميم</h2>
+  <p><strong>غياب حالات التحميل المتقدمة:</strong> رغم وجود مؤشرات تحميل بسيطة (رمز الساعة الرملية)، إلا أن التطبيق يفتقر إلى مؤشرات تحميل متحركة (Spinners أو Skeleton Loading) تمنح المستخدم إحساسا أفضل بأن النظام يعمل. مؤشر "جارٍ التحليل بالذكاء الاصطناعي" النصي وحده قد لا يكون كافيا خاصة عند بطء الاتصال، حيث قد يظن المستخدم أن التطبيق توقف عن الاستجابة.</p>
+  <p><strong>غياب التنقل بين النتائج:</strong> لا توجد طريقة للتنقل بين نتائج بحث سابقة أو حفظ سجل البحث. عند إجراء بحث جديد، تختفي النتيجة السابقة نهائيا دون إمكانية الرجوع إليها. هذا يمثل مشكلة عملية للمحامي الذي يحتاج للمقارنة بين عدة مواد قانونية في نفس الجلسة.</p>
+  <p><strong>تصدير محدود:</strong> ميزة التصدير تنتج ملف نصي بسيط (TXT) فقط، بينما البيئة القانونية تحتاج صيغا أكثر احترافية مثل PDF أو DOCX مع تنسيق مناسب يتضمن شعار المكتب والبيانات الأساسية للمذكرة. الملف النصي البسيط لا يليق بطبيعة العمل القانوني الذي يتطلب مظهرا رسميا ومهنية عالية في الوثائق.</p>
+  <p><strong>لوحة الإدارة المكشوفة:</strong> لوحة استيراد القوانين مرئية لجميع المستخدمين رغم استخدام عنصر <code>&lt;details&gt;</code> لإخفائها. في التطبيقات الاحترافية، يجب أن تكون لوحة الإدارة في صفحة منفصلة محمية بمصادقة، وليست ضمن الواجهة الرئيسية للمستخدمين. وجودها هنا حتى وإن كان مطويا يسبب ارتباكا للمستخدم العادي ويمثل مخاطرة أمنية.</p>
+  <p><strong>غياب التعامل مع الأخطاء البصري:</strong> عند فشل الاتصال بالخادم، تظهر رسائل خطأ نصية بسيطة داخل المحتوى دون تصميم بصري مناسب يلفت الانتباه. يجب أن تظهر الأخطاء في إشعارات منبثقة (Toast Notifications) أو صناديق تنبيه واضحة ومميزة بصريا.</p>
+
+  <!-- SECTION 3 -->
+  <h1 class="page-break">3. هيكل الكود وجودته</h1>
+
+  <h2>3.1 نقاط القوة في الكود</h2>
+  <p><strong>البنية الوظيفية الواضحة:</strong> الكود منظم بشكل منطقي مع فصل واضح بين الأقسام: الأنماط (CSS) في رأس الصفحة، وقاعدة البيانات والمنطق البرمجي (JavaScript) في نهايتها. التعليقات العربية المستخدمة لتقسيم الأقسام (مثل "محرك البحث القانوني" و"قاعدة البيانات القانونية") تسهل قراءة الكود وفهم بنيته. هذا التنظيم يجعل الصيانة والتعديل أسهل رغم كون الكود في ملف واحد.</p>
+  <p><strong>الدوال المساعدة المفيدة:</strong> دوال مثل <code>fill()</code> و<code>fillNaqd()</code> و<code>notFoundData()</code> توفر إعادة استخدام جيدة للكود وتقلل التكرار. دالة <code>notFoundData()</code> بالذات توفر بيانات نموذجية ذكية عندما لا تكون المادة موجودة في قاعدة البيانات، مما يمنع التطبيق من التعطل ويمنح المستخدم نتائج ولو تقريبية.</p>
+  <p><strong>التراجع المتدرج (Graceful Degradation):</strong> التطبيق مصمم ليعمل حتى بدون اتصال بالخادم، حيث يلجأ للبيانات المحلية المدمجة عند فشل الاتصال بـ API. هذه ميزة مهمة تضمن استمرار عمل التطبيق في مختلف الظروف. كل نقطة اتصال بـ API محاطة بكتلة try/catch تتعامل مع الأخطاء بسلاسة.</p>
+
+  <h2>3.2 نقاط الضعف في الكود</h2>
+  <p><strong>ملف واحد ضخم (Monolithic Architecture):</strong> جميع الأكواد (HTML + CSS + JS + قاعدة البيانات) في ملف واحد يبلغ حوالي 550 سطرا. هذا النمط غير مناسب للتطبيقات الحقيقية لأنه يصعب صيانته واختباره وتطويره من قبل فريق عمل. الفصل بين الملفات (MVC أو حتى فصل بسيط) أصبح معيارا أساسيا في تطوير الويب الحديث، وتجاهله يحد من قابلية التوسع بشكل كبير.</p>
+  <p><strong>ثغرة XSS خطيرة:</strong> الدالة <code>fill()</code> تستخدم <code>innerHTML</code> لحقن المحتوى مباشرة:</p>
+  <div class="code-block">
+list.innerHTML = items.map(i =&gt; `&lt;li&gt;${i}&lt;/li&gt;`).join('');
+  </div>
+  <p>هذا النمط يعرض التطبيق لهجوم حقن الشيفرات المتقاطعة (Cross-Site Scripting). إذا تم العبث بالبيانات (سواء من قاعدة البيانات المحلية أو من استجابة API)، يمكن تنفيذ شفرات خبيثة في متصفح المستخدم. الحل الآمن هو استخدام <code>textContent</code> أو إنشاء العناصر عبر <code>document.createElement()</code> مع تعيين النص بشكل آمن.</p>
+  <p><strong>عدم التحقق من المدخلات:</strong> حقل رقم المادة لا يخضع لأي تحقق من صحة المدخلات (Input Validation). المستخدم يمكنه إدخال أي نص بما في ذلك شفرات خبيثة. يجب تطبيع المدخلات (Sanitization) والتحقق من أنها تتطابق مع نمط أرقام المواد القانونية المتوقعة، مثل استخدام تعبير نمطي يتحقق من أن الإدخال يحتوي فقط على أرقام أو أرقام مع حروف محددة.</p>
+  <p><strong>استخدام CDN في الإنتاج:</strong> الاعتماد على <code>cdn.tailwindcss.com</code> في رأس الصفحة يمثل مشكلة على مستويين: أولا، لا يُستخدم CDN التطويري في بيئات الإنتاج لأنه بطيء ويحتاج تحميل في كل زيارة. ثانيا، إذا تعطل خادم CDN أو حُجب في منطقة معينة، سيفقد التطبيق تنسيقه بالكامل. يجب تجميع (Build) ملفات CSS مسبقا وضمها محليا.</p>
+  <p><strong>غياب اختبارات الوحدة:</strong> لا توجد أي اختبارات آلية (Unit Tests) للمنطق البرمجي. مع تطور التطبيق وإضافة ميزات جديدة، يصبح غياب الاختبارات مخاطرة حقيقية قد تؤدي لانحدار الكود (Regression) دون اكتشافه. هذا أمر بالغ الأهمية خاصة في تطبيق قانوني قد تكون الأخطاء فيه مكلفة.</p>
+
+  <!-- SECTION 4 -->
+  <h1>4. قاعدة البيانات</h1>
+
+  <h2>4.1 التقييم الحالي</h2>
+  <p>قاعدة البيانات الحالية مدمجة في الكود ككائن JavaScript ثابت (Object) يحتوي على خمسة إدخالات فقط هي: المادة 17 عقوبات، المادة 234 عقوبات، المادة 304 إجراءات جنائية، المادة 206 إجراءات جنائية، والمادة 163 مدني. هذا يعني أن التغطية الفعلية لا تتجاوز نسبة ضئيلة جدا من إجمالي المواد القانونية المصرية، والتي تُعد بآلاف المواد عبر القوانين الخمسة المدعومة.</p>
+  <p>من الناحية الإيجابية، بنية كل إدخال في قاعدة البيانات مصممة بشكل ممتاز ومتكامل، حيث تتضمن: نص المادة الأصلي، والدفوع الشكلية، والدفوع الموضوعية، والثغرات، وأحكام النقض مع أرقام الطعون، ومسودة المذكرة القانونية. هذا الهيكل يمثل نموذجا جيدا يمكن البناء عليه لتوسيع قاعدة البيانات بشكل منهجي. كما أن الدالة <code>notFoundData()</code> توفر بيانات نموذجية ذكية للمواد غير الموجودة، مما يمنع التطبيق من التعطل.</p>
+  <p>ومع ذلك، فإن تخزين قاعدة البيانات ككود JavaScript ثابت يعني أن أي تحديث يتطلب تعديل الكود المصدري وإعادة نشر التطبيق بالكامل. هذا النمط غير عملي للتطبيقات الديناميكية التي تحتاج تحديث بياناتها باستمرار، خاصة أن التشريعات المصرية تتغير بشكل دوري مع إصدار تعديلات جديدة.</p>
+
+  <h2>4.2 التوصيات</h2>
+  <ul>
+    <li>نقل قاعدة البيانات إلى قاعدة بيانات حقيقية (PostgreSQL أو MongoDB) مع واجهة API مستقلة للوصول للبيانات، مما يفصل بين منطق البيانات ومنطق العرض.</li>
+    <li>بناء نظام استيراد آلي يمكنه جلب وتحليل النصوص القانونية من المصادر الرسمية (مثل منشورات.أورج) بشكل دوري ومعالجتها هيكليا.</li>
+    <li>إضافة آلية تخزين مؤقت (Caching) محلية باستخدام IndexedDB أو localStorage لتحسين سرعة الاستجابة وتقليل الاعتماد على الشبكة.</li>
+    <li>توسيع قاعدة البيانات لتشمل المواد الأكثر استخداما أولا (مبدأ باريتو: 20% من المواد تُستخدم في 80% من القضايا)، ثم التوسع تدريجيا.</li>
+  </ul>
+
+  <!-- SECTION 5 -->
+  <h1 class="page-break">5. الأمان والحماية</h1>
+
+  <h2>5.1 الثغرات الأمنية الحرجة</h2>
+
+  <div class="danger-box">
+    <p><strong>تحذير:</strong> التطبيق يحتوي على ثغرات أمنية خطيرة يجب معالجتها قبل أي استخدام فعلي في بيئة إنتاجية.</p>
+  </div>
+
+  <table class="findings-table">
+    <thead>
+      <tr>
+        <th style="width:22%">الثغرة</th>
+        <th style="width:10%">الخطورة</th>
+        <th style="width:38%">الوصف</th>
+        <th style="width:30%">الحل المقترح</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>حقن الشيفرات المتقاطعة (XSS)</td>
+        <td><span class="badge-critical">حرج</span></td>
+        <td>استخدام innerHTML لحقن بيانات ديناميكية بدون تطبيع يسمح بتنفيذ شفرات خبيثة في متصفح المستخدم عبر حقن وسوم script أو معالجات أحداث onerror</td>
+        <td>استخدام textContent أو إنشاء عناصر DOM بشكل آمن مع تطبيع جميع المدخلات قبل عرضها</td>
+      </tr>
+      <tr>
+        <td>رمز الاستيراد بدون حماية</td>
+        <td><span class="badge-critical">حرج</span></td>
+        <td>رمز الاستيراد (INGEST_TOKEN) يُرسل كنص صريح في الطلب بدون أي آلية مصادقة حقيقية، ويمكن اعتراضه بسهولة</td>
+        <td>استخدام نظام مصادقة حقيقي (JWT أو OAuth) مع تشفير الاتصال عبر HTTPS وإدارة آمنة للرموز</td>
+      </tr>
+      <tr>
+        <td>غياب حماية CSRF</td>
+        <td><span class="badge-high">عالٍ</span></td>
+        <td>طلبات POST لواجهة الاستيراد لا تحتوي على أي رمز حماية ضد تزوير الطلبات بين المواقع</td>
+        <td>إضافة رموز CSRF Token لجميع الطلبات المعدلة للبيانات والتحقق منها على الخادم</td>
+      </tr>
+      <tr>
+        <td>عدم التحقق من المدخلات</td>
+        <td><span class="badge-high">عالٍ</span></td>
+        <td>حقل رقم المادة يقبل أي إدخال بدون تحقق، مما يمكن استغلاله لحقن شفرات في طلبات API</td>
+        <td>تطبيق تحقق صارم على جانبي العميل والخادم مع تطبيع المدخلات وتقييد الأحرف المسموحة</td>
+      </tr>
+      <tr>
+        <td>غياب تحديد معدل الطلبات</td>
+        <td><span class="badge-medium">متوسط</span></td>
+        <td>لا يوجد حد لعدد الطلبات الممكن إرسالها لواجهات API، مما يعرض الخادم لهجمات الحرمان من الخدمة</td>
+        <td>تطبيق Rate Limiting على جميع نقاط النهاية مع عتبات مناسبة لكل نوع طلب</td>
+      </tr>
+      <tr>
+        <td>لوحة الإدارة مكشوفة</td>
+        <td><span class="badge-medium">متوسط</span></td>
+        <td>وظائف الإدارة (استيراد القوانين) متاحة في الواجهة الرئيسية بدلا من صفحة إدارية محمية منفصلة</td>
+        <td>فصل لوحة الإدارة بالكامل مع حمايتها بمصادقة وتفويض مناسبين</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>5.2 التوصيات الأمنية</h2>
+  <ul>
+    <li><strong>إصلاح XSS فورا:</strong> استبدال جميع استخدامات <code>innerHTML</code> ببدائل آمنة. هذا الإصلاح يجب أن يكون الأولوية القصوى لأنه يمثل خطرا مباشرا على مستخدمي التطبيق.</li>
+    <li><strong>تطبيق مبدأ الدفاع المتعدد الطبقات:</strong> التحقق من المدخلات على مستوى العميل والخادم معا، وتطبيع جميع البيانات الواردة قبل معالجتها أو عرضها.</li>
+    <li><strong>تشفير جميع الاتصالات:</strong> ضمان استخدام HTTPS لجميع الاتصالات مع الخادم، خاصة عند إرسال رموز المصادقة والبيانات الحساسة.</li>
+    <li><strong>تطبيق سياسة أمن المحتوى (CSP):</strong> إضافة رؤوس Content-Security-Policy لتقييد مصادر السكريبتات والأنماط والموارد الخارجية المسموح بتحميلها.</li>
+    <li><strong>إدارة آمنة للجلسات:</strong> تطبيق نظام مصادقة وجلسات آمن مع انتهاء صلاحية الجلسات تلقائيا بعد فترة من عدم النشاط.</li>
+  </ul>
+
+  <!-- SECTION 6 -->
+  <h1>6. الأداء والتحسين</h1>
+
+  <p>يعاني التطبيق من عدة مشاكل في الأداء قد تؤثر على تجربة المستخدم خاصة عند زيادة حجم البيانات وعدد المستخدمين:</p>
+
+  <p><strong>تحميل Tailwind عبر CDN:</strong> مكتبة Tailwind CSS تُحمّل بالكامل من CDN في كل زيارة، مما يعني تحميل مئات الكيلوبايتات من الأنماط غير المستخدمة. في بيئة الإنتاج، يجب تجميع (Build) فقط الأنماط المستخدمة فعليا باستخدام أداة PostCSS مع إضافة Autoprefixer، مما يمكن أن يقلل حجم CSS من أكثر من 3 ميجابايت إلى أقل من 50 كيلوبايت.</p>
+
+  <p><strong>غياب التخزين المؤقت (Caching):</strong> التطبيق لا يستخدم أي آلية للتخزين المؤقت محليا. كل بحث عن مادة قانونية يرسل طلبا جديدا للخادم حتى لو سبق البحث عن نفس المادة في نفس الجلسة. استخدام IndexedDB أو حتى localStorage لتخزين نتائج البحث السابقة يمكن أن يقلل حجم الطلبات الشبكية بشكل كبير ويحسن سرعة الاستجابة، خاصة للمواد التي يكثر البحث عنها.</p>
+
+  <p><strong>عدم تحميل الخطوط بشكل مسبق:</strong> خطوط Google Fonts تُحمّل بدون استخدام <code>font-display: swap</code> أو <code>preconnect</code>، مما قد يسبب وميض النص (FOUT) أو تأخرا في عرض المحتوى. يجب إضافة <code>rel="preconnect"</code> لـ <code>fonts.googleapis.com</code> و<code>fonts.gstatic.com</code> لتسريع تحميل الخطوط وتحسين تجربة العرض الأولي.</p>
+
+  <p><strong>قاعدة بيانات محلية كبيرة:</strong> مع توسع قاعدة البيانات المحلية (كائن DB)، سيزداد حجم ملف HTML الأساسي بشكل كبير مما يبطئ تحميل الصفحة الأولى. يجب نقل البيانات بالكامل إلى واجهة API واستخدام التحميل الكسول (Lazy Loading) لجلب البيانات فقط عند الحاجة.</p>
+
+  <p><strong>عدم ضغط الصور والأصول:</strong> التطبيق لا يستخدم أي تقنيات ضغط أو تحسين للأصول. عند إضافة أي صور أو أيقونات في المستقبل، يجب استخدام صيغ حديثة مثل WebP مع أحجام متعددة (Responsive Images) وضغط بدون فقدان.</p>
+
+  <!-- SECTION 7 -->
+  <h1>7. إمكانية الوصول</h1>
+
+  <p>إمكانية الوصول (Accessibility) في التطبيق ضعيفة وتحتاج تحسينات جوهرية لتتوافق مع معايير WCAG 2.1 المستوى AA:</p>
+
+  <table class="findings-table">
+    <thead>
+      <tr>
+        <th style="width:28%">المشكلة</th>
+        <th style="width:10%">الخطورة</th>
+        <th style="width:32%">التأثير</th>
+        <th style="width:30%">الحل</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>غياب سمات ARIA</td>
+        <td><span class="badge-high">عالٍ</span></td>
+        <td>قارئات الشاشة لا تستطيع فهم بنية الصفحة والأزرار التفاعلية والمناطق الديناميكية</td>
+        <td>إضافة aria-label وaria-live وrole لجميع العناصر التفاعلية ومناطق المحتوى الديناميكي</td>
+      </tr>
+      <tr>
+        <td>غياب تنقل لوحة المفاتيح</td>
+        <td><span class="badge-high">عالٍ</span></td>
+        <td>المستخدمون الذين يعتمدون على لوحة المفاتيح يواجهون صعوبة في التنقل بين الأقسام واستخدام التطبيق</td>
+        <td>إضافة focus styles واضحة وتحسين ترتيب التبويب (Tab Order) وإضافة اختصارات لوحة مفاتيح</td>
+      </tr>
+      <tr>
+        <td>تباين ألوان غير كافٍ</td>
+        <td><span class="badge-medium">متوسط</span></td>
+        <td>بعض النصوص الرمادية الفاتحة على خلفية داكنة قد تكون صعبة القراءة لضعاف البصر</td>
+        <td>زيادة نسبة التباين إلى 4.5:1 على الأقل للنصوص العادية و3:1 للنصوص الكبيرة</td>
+      </tr>
+      <tr>
+        <td>غياب النصوص البديلة</td>
+        <td><span class="badge-medium">متوسط</span></td>
+        <td>الأيقونات SVG والرموز التعبيرية ليس لها نصوص بديلة لقارئات الشاشة</td>
+        <td>إضافة aria-label أو title لجميع عناصر SVG وalt للصور وaria-hidden للزخارف</td>
+      </tr>
+      <tr>
+        <td>عدم إدارة التركيز</td>
+        <td><span class="badge-medium">متوسط</span></td>
+        <td>عند ظهور النتائج، لا ينتقل التركيز تلقائيا إليها مما يربك مستخدمي قارئات الشاشة</td>
+        <td>نقل التركيز برمجيا إلى منطقة النتائج بعد تحميلها مع إعلان التحديث عبر aria-live</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 8 -->
+  <h1>8. التكامل مع واجهات البرمجة (API)</h1>
+
+  <p>التطبيق مصمم للتكامل مع ثلاث واجهات برمجة رئيسية، لكن التنفيذ الحالي يواجه عدة تحديات:</p>
+
+  <h3>واجهة جلب نص المادة (<code>/api/public/article</code>)</h3>
+  <p>تعمل بشكل مقبول مع معالجة أخطاء بسيطة عبر try/catch. المشكلة الرئيسية هي غياب التحقق من صحة البيانات المُعادة من الخادم (Response Validation). إذا أرجع الخادم بيانات ببنية غير متوقعة، قد يتعطل التطبيق بصمت. يجب إضافة طبقة تحقق من استجابة API قبل استخدام البيانات، مع التأكد من وجود الحقول المطلوبة ونوعها الصحيح.</p>
+
+  <h3>واجهة التحليل بالذكاء الاصطناعي (<code>/api/public/analyze</code>)</h3>
+  <p>تمثل الواجهة الأكثر أهمية وقيمة في التطبيق، لكن التنفيذ الحالي يرسل نص المادة الكامل إلى API بدون أي ضغط أو تلخيص مسبق. بالنسبة للمواد القانونية الطويلة، هذا يعني طلبات شبكية كبيرة وأحمال معالجة عالية على الخادم. ينبغي إرسال المعلومات الأساسية فقط (رقم المادة وفرع القانون والنص) مع تجنب البيانات الزائدة. كما يجب إضافة آلية إعادة المحاولة (Retry) مع تراجع أسي (Exponential Backoff) عند فشل الطلب.</p>
+
+  <h3>واجهة استيراد القوانين (<code>/api/public/ingest-law</code>)</h3>
+  <p>هذه الواجهة هي الأكثر خطورة أمنيا. رمز المصادقة يُرسل كرأس HTTP بسيط (<code>x-ingest-token</code>) بدون أي تشفير إضافي أو تحقق من الهوية. كما أن URL المصدر (<code>sourceUrl</code>) يُرسل بدون تحقق، مما يفتح باب هجمات SSRF (تزوير الطلبات من جانب الخادم) حيث يمكن للمهاجم إجبار الخادم على طلب موارد داخلية. يجب التحقق من أن URL المصدر ينتمي للنطاقات المسموح بها فقط (قائمة بيضاء) ورفض أي طلبات لـ URLs خارجية غير معتمدة.</p>
+
+  <h3>واجهة إحصاءات القوانين (<code>/api/public/law-stats</code>)</h3>
+  <p>واجهة بسيطة لعرض عدد المواد المحفوظة لكل قانون. لا توجد مشاكل أمنية كبيرة فيها، لكن يُنصح بإضافة تخزين مؤقت للاستجابة لتقليل الحمل على الخادم عند الطلبات المتكررة، خاصة أن هذه البيانات لا تتغير بشكل متكرر.</p>
+
+  <!-- SECTION 9 -->
+  <h1 class="page-break">9. جدول النتائج والتوصيات</h1>
+
+  <table class="findings-table">
+    <thead>
+      <tr>
+        <th style="width:6%">م</th>
+        <th style="width:20%">المجال</th>
+        <th style="width:12%">الأولوية</th>
+        <th style="width:30%">المشكلة</th>
+        <th style="width:32%">التوصية</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>الأمان</td>
+        <td><span class="badge-critical">حرج</span></td>
+        <td>ثغرة XSS عبر innerHTML</td>
+        <td>استبدال innerHTML بـ textContent أو createElement فورا</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>الأمان</td>
+        <td><span class="badge-critical">حرج</span></td>
+        <td>غياب مصادقة حقيقية لواجهة الاستيراد</td>
+        <td>تطبيق نظام مصادقة JWT مع إدارة آمنة للجلسات</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>الأمان</td>
+        <td><span class="badge-high">عالٍ</span></td>
+        <td>عدم التحقق من المدخلات</td>
+        <td>تطبيق تحقق صارم على العميل والخادم مع تطبيع المدخلات</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>الأمان</td>
+        <td><span class="badge-high">عالٍ</span></td>
+        <td>غياب حماية CSRF</td>
+        <td>إضافة رموز CSRF لجميع الطلبات المعدلة</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>الكود</td>
+        <td><span class="badge-high">عالٍ</span></td>
+        <td>بنية ملف واحد ضخمة</td>
+        <td>فصل الملفات إلى مكونات مستقلة باستخدام إطار عمل حديث</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>البيانات</td>
+        <td><span class="badge-high">عالٍ</span></td>
+        <td>قاعدة بيانات محدودة ومدمجة في الكود</td>
+        <td>نقل إلى قاعدة بيانات حقيقية مع API مستقلة</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>الأداء</td>
+        <td><span class="badge-high">عالٍ</span></td>
+        <td>تحميل Tailwind كاملا من CDN</td>
+        <td>تجميع CSS محليا واستخدام فقط الأنماط المطلوبة</td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td>التصميم</td>
+        <td><span class="badge-medium">متوسط</span></td>
+        <td>تصدير نصي بسيط فقط</td>
+        <td>إضافة تصدير PDF وDOCX مع تنسيق احترافي</td>
+      </tr>
+      <tr>
+        <td>9</td>
+        <td>التصميم</td>
+        <td><span class="badge-medium">متوسط</span></td>
+        <td>لوحة الإدارة مكشوفة في الواجهة الرئيسية</td>
+        <td>فصلها في صفحة محمية بمصادقة مستقلة</td>
+      </tr>
+      <tr>
+        <td>10</td>
+        <td>التصميم</td>
+        <td><span class="badge-medium">متوسط</span></td>
+        <td>غياب سجل البحث والتنقل بين النتائج</td>
+        <td>إضافة سجل بحث وتبويبات للنتائج المتعددة</td>
+      </tr>
+      <tr>
+        <td>11</td>
+        <td>الأداء</td>
+        <td><span class="badge-medium">متوسط</span></td>
+        <td>غياب التخزين المؤقت</td>
+        <td>استخدام IndexedDB لتخزين نتائج البحث مؤقتا</td>
+      </tr>
+      <tr>
+        <td>12</td>
+        <td>إمكانية الوصول</td>
+        <td><span class="badge-high">عالٍ</span></td>
+        <td>غياب سمات ARIA ودعم قارئات الشاشة</td>
+        <td>إضافة aria-label وaria-live وrole لجميع العناصر التفاعلية</td>
+      </tr>
+      <tr>
+        <td>13</td>
+        <td>الأمان</td>
+        <td><span class="badge-medium">متوسط</span></td>
+        <td>غياب تحديد معدل الطلبات</td>
+        <td>تطبيق Rate Limiting على جميع نقاط النهاية</td>
+      </tr>
+      <tr>
+        <td>14</td>
+        <td>الكود</td>
+        <td><span class="badge-low">منخفض</span></td>
+        <td>غياب اختبارات آلية</td>
+        <td>إضافة اختبارات وحدة باستخدام Jest أو Vitest</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 10 -->
+  <h1>10. الخلاصة والتقييم العام</h1>
+
+  <div class="summary-score">
+    <div class="score-circle">5.5</div>
+    <div class="score-label">من 10 - تقييم عام</div>
+  </div>
+
+  <div class="rating-box">
+    <h3>التقييم التفصيلي حسب المجال</h3>
+    <div class="rating-item">
+      <span class="rating-label">الفكرة والقيمة المضافة</span>
+      <span class="rating-value rating-excellent">8.5 / 10</span>
+    </div>
+    <div class="rating-item">
+      <span class="rating-label">تصميم واجهة المستخدم (UI/UX)</span>
+      <span class="rating-value rating-good">7.0 / 10</span>
+    </div>
+    <div class="rating-item">
+      <span class="rating-label">هيكل الكود وجودته</span>
+      <span class="rating-value rating-fair">5.0 / 10</span>
+    </div>
+    <div class="rating-item">
+      <span class="rating-label">قاعدة البيانات</span>
+      <span class="rating-value rating-fair">4.0 / 10</span>
+    </div>
+    <div class="rating-item">
+      <span class="rating-label">الأمان والحماية</span>
+      <span class="rating-value rating-poor">3.0 / 10</span>
+    </div>
+    <div class="rating-item">
+      <span class="rating-label">الأداء والتحسين</span>
+      <span class="rating-value rating-fair">5.0 / 10</span>
+    </div>
+    <div class="rating-item">
+      <span class="rating-label">إمكانية الوصول</span>
+      <span class="rating-value rating-poor">3.5 / 10</span>
+    </div>
+    <div class="rating-item">
+      <span class="rating-label">التكامل مع API</span>
+      <span class="rating-value rating-fair">5.5 / 10</span>
+    </div>
+  </div>
+
+  <p>يتميز تطبيق "المحلل القانوني المصري" بفكرة مبتكرة وقيمة مضافة حقيقية للمجتمع القانوني المصري، حيث يقدم أداة فريدة تساعد المحامين والباحثين في تحليل المواد القانونية واستخراج الدفوع والثغرات بشكل آلي. التصميم البصري احترافي ومتناسق مع طبيعة التطبيق، ودعم اللغة العربية متميز.</p>
+
+  <p>مع ذلك، التطبيق في حالته الحالية يُعد نموذجا أوليا يحتاج إلى عمل جوهري قبل أن يكون صالحا للاستخدام الفعلي في بيئة إنتاجية. الثغرات الأمنية (خاصة XSS وغياب المصادقة) تمثل المخاطرة الأكبر ويجب معالجتها كأولوية قصوى. كما أن بنية الكود الأحادية وقاعدة البيانات المحدودة تحدان بشكل كبير من قابلية التوسع والصيانة على المدى الطويل.</p>
+
+  <div class="highlight-box">
+    <p><strong>الخلاصة:</strong> الفكرة ممتازة والتصميم البصري جيد، لكن التنفيذ الفني يحتاج تحسينات جذرية في الأمان وهيكل الكود وقاعدة البيانات ليصبح التطبيق جاهزا للاستخدام الحقيقي. ننصح بمعالجة الثغرات الأمنية الحرجة أولا، ثم إعادة هيكلة الكود، ثم توسيع قاعدة البيانات وتحسين الأداء.</p>
+  </div>
+
+  <footer>
+    تقرير مراجعة تطبيق المحلل القانوني المصري - مايو 2026 - أداة استرشادية للمراجعة الفنية
+  </footer>
+
+</div>
+</body>
+</html>
