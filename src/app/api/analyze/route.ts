@@ -64,16 +64,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate text
-    if (!text || typeof text !== 'string' || text.trim().length === 0) {
+    // Validate text - must be substantial
+    if (!text || typeof text !== 'string' || text.trim().length < 10) {
       return NextResponse.json(
-        { ok: false, error: 'نص المادة مطلوب' } as AnalyzeResponse,
+        { ok: false, error: 'نص المادة مطلوب ويجب أن يكون 10 أحرف على الأقل' } as AnalyzeResponse,
         { status: 400 }
       );
     }
 
     // Sanitize text - limit length
-    const sanitizedText = text.trim().slice(0, 5000);
+    const sanitizedText = text.trim().slice(0, 10000);
     const lawName = LAW_NAMES[law as LawType];
 
     // Use z-ai-web-dev-sdk for AI analysis
@@ -82,24 +82,33 @@ export async function POST(request: NextRequest) {
     try {
       const zai = await getZAIClient();
 
-      const systemPrompt = `You are an expert Egyptian legal analyst. Analyze the given legal article and provide a comprehensive analysis.
+      const systemPrompt = `أنت خبير تحليل قانوني مصري متخصص. مهمتك هي تحليل نص المادة القانونية المُقدمة لك بدقة.
 
-CRITICAL: You MUST respond with ONLY a valid JSON object. No text before or after the JSON. No markdown code blocks. No explanation. Just the raw JSON object.
+قاعدة أساسية: تحليلك يجب أن يعتمد حصرياً على النص المُقدم. لا تقم بتأويل أو إضافة معانٍ غير موجودة في النص. إذا كان النص غير واضح، أشر إلى ذلك كثغرة.
 
-The JSON must follow this exact structure:
-{"shakly":["defense 1","defense 2"],"mawdoo":["defense 1","defense 2"],"thaghra":["loophole 1","loophole 2"],"naqd":[{"ref":"case reference","text":"principle text"}],"muzakkira":"legal memo draft text"}
+يجب أن تستجيب بصيغة JSON فقط بدون أي نص قبله أو بعده. بدون أكواد Markdown. بدون شرح. فقط كائن JSON خام.
 
-Requirements:
-1. shakly: List procedural defenses (jurisdiction, statute of limitations, procedural validity)
-2. mawdoo: List substantive defenses (elements of crime/obligation, causation, intent)
-3. thaghra: List legislative loopholes, ambiguities, and weaknesses
-4. naqd: List Egyptian Court of Cassation principles with realistic case references
-5. muzakkira: Write a complete legal memo draft in formal Egyptian legal Arabic
+يجب أن يتبع JSON الهيكل التالي بالضبط:
+{"shakly":["دفعة 1","دفعة 2"],"mawdoo":["دفعة 1","دفعة 2"],"thaghra":["ثغرة 1","ثغرة 2"],"naqd":[{"ref":"رقم الطعن","text":"نص المبدأ"}],"muzakkira":"نص مسودة المذكرة"}
 
-All content MUST be in Arabic with formal Egyptian legal terminology.
-Ensure all string values are properly escaped for valid JSON. Do NOT use unescaped newlines or special characters in string values.`;
+المتطلبات:
+1. shakly: قائمة بالدفوع الشكلية والإجرائية (الاختصاص، التقادم، بطلان الإجراءات، عدم قبول، الخ)
+2. mawdoo: قائمة بالدفوع الموضوعية (انتفاء الأركان، علاقة السببية، القصد، حسن النية، الخ)
+3. thaghra: قائمة بالثغرات التشريعية والغموض ونقاط الضعف في النص المُقدم
+4. naqd: قائمة بمبادئ محكمة النقض المصرية ذات الصلة بمراجع طعن واقعية
+5. muzakkira: مسودة مذكرة قانونية كاملة بلغة عربية قانونية رسمية
 
-      const userPrompt = `حلل المادة ${num} من ${lawName}:\n\n${sanitizedText}`;
+جميع المحتوى يجب أن يكون بالعربية باستخدام المصطلحات القانونية المصرية الرسمية.
+تأكد من أن جميع قيم النصوص مُهربة بشكل صحيح لـ JSON صالح. لا تستخدم أسطراً جديدة غير مُهربة أو أحرف خاصة في قيم النصوص.
+كل دفعة أو ثغرة يجب أن تكون محددة ومتعلقة بالنص المُقدم وليست عامة.`;
+
+      const userPrompt = `حلل المادة ${num} من ${lawName} بناءً على النص التالي حصراً:
+
+---
+${sanitizedText}
+---
+
+ملاحظة هامة: حلل فقط النص المكتوب أعلاه. لا تضف معلومات من عندك عن هذه المادة. إذا كان النص يختلف عما تعرفه عن هذه المادة، التزم بالنص المُقدم.`;
 
       const response = await zai.chat.completions.create({
         model: 'glm-4-flash',
@@ -107,7 +116,7 @@ Ensure all string values are properly escaped for valid JSON. Do NOT use unescap
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
         ],
-        temperature: 0.7,
+        temperature: 0.5,
       });
 
       // Extract the response content
@@ -147,7 +156,7 @@ Ensure all string values are properly escaped for valid JSON. Do NOT use unescap
       } catch (parseError) {
         // Strategy 4: If all JSON parsing fails, try to extract structured data from text
         console.warn('JSON parsing failed, attempting text extraction:', parseError);
-        
+
         // Try to extract arrays from the text response
         const extractList = (key: string): string[] => {
           const regex = new RegExp(`"${key}"\\s*:\\s*\\[([\\s\\S]*?)\\]`, 'g');

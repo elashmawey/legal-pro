@@ -1,9 +1,10 @@
 'use client';
 
-import { Search } from 'lucide-react';
+import { Search, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -17,9 +18,12 @@ import { QuickExamples } from './QuickExamples';
 interface SearchPanelProps {
   law: LawType;
   num: string;
+  articleText: string;
+  isTextFromDB: boolean;
   isLoading: boolean;
   onLawChange: (law: LawType) => void;
   onNumChange: (num: string) => void;
+  onArticleTextChange: (text: string) => void;
   onAnalyze: () => void;
   onQuickExample: (law: LawType, num: string) => void;
 }
@@ -27,12 +31,17 @@ interface SearchPanelProps {
 export function SearchPanel({
   law,
   num,
+  articleText,
+  isTextFromDB,
   isLoading,
   onLawChange,
   onNumChange,
+  onArticleTextChange,
   onAnalyze,
   onQuickExample,
 }: SearchPanelProps) {
+  const canAnalyze = num.trim() && articleText.trim().length >= 10;
+
   return (
     <section
       className="card-glass gold-border rounded-2xl p-4 md:p-6 mb-8 gold-glow"
@@ -87,7 +96,7 @@ export function SearchPanel({
               onNumChange(val);
             }}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') onAnalyze();
+              if (e.key === 'Enter' && canAnalyze) onAnalyze();
             }}
             className="w-full bg-navy-input border-gold-500/30 text-white h-11 arabic-num placeholder:text-gray-500"
             aria-label="رقم المادة القانونية"
@@ -97,7 +106,7 @@ export function SearchPanel({
         <div className="md:col-span-4 flex items-end">
           <Button
             onClick={onAnalyze}
-            disabled={isLoading || !num.trim()}
+            disabled={isLoading || !canAnalyze}
             className="w-full bg-gradient-to-l from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-navy-900 font-bold h-11 transition-all gold-glow disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="تحليل المادة القانونية"
           >
@@ -112,6 +121,43 @@ export function SearchPanel({
           </Button>
         </div>
       </div>
+
+      {/* حقل إدخال نص المادة */}
+      <div className="mt-4">
+        <Label htmlFor="article-text" className="block text-sm mb-1 text-gray-300 flex items-center gap-2">
+          <FileText className="w-4 h-4" aria-hidden="true" />
+          نص المادة القانونية
+          {isTextFromDB && (
+            <span className="text-xs text-green-400 font-normal flex items-center gap-1">
+              ✓ من قاعدة البيانات
+            </span>
+          )}
+          {!isTextFromDB && num.trim() && (
+            <span className="text-xs text-amber-400 font-normal">
+              أدخل نص المادة يدوياً لتحليلها بدقة
+            </span>
+          )}
+        </Label>
+        <Textarea
+          id="article-text"
+          value={articleText}
+          onChange={(e) => onArticleTextChange(e.target.value)}
+          placeholder={
+            num.trim()
+              ? `الصق هنا نص المادة ${num} من ${LAW_NAMES[law]} لتحليلها بدقة...`
+              : 'أدخل رقم المادة أولاً، ثم الصق نصها هنا للتحليل...'
+          }
+          className="w-full bg-navy-input border-gold-500/30 text-white min-h-[120px] text-sm leading-relaxed placeholder:text-gray-500 resize-y"
+          dir="rtl"
+          aria-label="نص المادة القانونية للتحليل"
+        />
+        {articleText.trim().length > 0 && articleText.trim().length < 10 && (
+          <p className="text-xs text-amber-400 mt-1">
+            النص قصير جداً - يُرجى إدخال نص المادة كاملاً للحصول على تحليل دقيق
+          </p>
+        )}
+      </div>
+
       <QuickExamples onSelect={onQuickExample} />
     </section>
   );
