@@ -1,8 +1,10 @@
 import { ArticleData, LAW_NAMES, LawType, NaqdEntry } from './types';
+import { ARTICLE_TEXT_DB } from './article-store';
 
 // ============================================================
 // قاعدة البيانات القانونية المصرية
 // المفتاح: `${lawType}-${articleNum}`
+// يتضمن: نص المادة الأصلي من المصادر الرسمية + بيانات التحليل
 // ============================================================
 
 const DB: Record<string, ArticleData> = {
@@ -440,7 +442,7 @@ const DB: Record<string, ArticleData> = {
 };
 
 /**
- * Get article data from the database
+ * Get article data from the local analysis database
  */
 export function getArticleData(law: LawType, num: string): ArticleData | null {
   const key = `${law}-${num}`;
@@ -448,11 +450,18 @@ export function getArticleData(law: LawType, num: string): ArticleData | null {
 }
 
 /**
- * Get article text only from the database
+ * Get article text from the article store (2302+ articles from official sources)
+ * Falls back to the local DB if not found in the store
  */
 export function getArticleText(law: LawType, num: string): string | null {
-  const data = getArticleData(law, num);
-  return data?.text || null;
+  const key = `${law}-${num}`;
+  // First check the article store (official texts)
+  const storeText = ARTICLE_TEXT_DB[key];
+  if (storeText) return storeText;
+  // Then check the local DB
+  const dbData = DB[key];
+  if (dbData) return dbData.text;
+  return null;
 }
 
 /**
@@ -521,8 +530,11 @@ export function getFallbackData(law: LawType, num: string): ArticleData {
 
   const muzakkira: string = `بالرجوع إلى نص المادة ${num} من ${lawName}، وإعمالاً للمبادئ العامة المستقرة في قضاء محكمة النقض، فإن الدفوع المثارة تتسم بالجدية وتستوجب من المحكمة الموقرة إعمال رقابتها على صحيح تطبيق القانون. (مذكرة نموذجية - يُستحسن تخصيصها بحسب وقائع الدعوى).`;
 
+  // Get the actual article text from the store if available
+  const actualText = getArticleText(law, num);
+
   return {
-    text: `لم يتم إدراج نص المادة ${num} من ${lawName} في قاعدة البيانات الحالية. يمكنك الاعتماد على التحليل بالذكاء الاصطناعي للحصول على تحليل شامل.`,
+    text: actualText || `لم يتم إدراج نص المادة ${num} من ${lawName} في قاعدة البيانات المحلية. يمكنك الاعتماد على التحليل بالذكاء الاصطناعي للحصول على تحليل شامل.`,
     shakly,
     mawdoo,
     thaghra,
@@ -542,6 +554,7 @@ export function getDBKeys(): string[] {
  * Get database statistics
  */
 export function getDBStats(): Record<LawType, number> {
+  // Count articles from the article store
   const stats: Record<string, number> = {
     penal: 0,
     criminal_proc: 0,
@@ -550,7 +563,7 @@ export function getDBStats(): Record<LawType, number> {
     personal: 0,
   };
 
-  for (const key of Object.keys(DB)) {
+  for (const key of Object.keys(ARTICLE_TEXT_DB)) {
     const law = key.split('-')[0] as LawType;
     if (law in stats) {
       stats[law]++;
