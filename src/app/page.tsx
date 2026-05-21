@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { Scale, Brain, Loader2, Wifi } from 'lucide-react';
+import { Scale, Brain } from 'lucide-react';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 import { LawType, ArticleData, LAW_NAMES } from '@/lib/types';
-import { getDBStats } from '@/lib/legal-db';
+import { getLocalAnalysis, getDBStats } from '@/lib/legal-db';
 import { SearchPanel } from '@/components/legal/SearchPanel';
 import { ResultsPanel } from '@/components/legal/ResultsPanel';
 import { EmptyState } from '@/components/legal/EmptyState';
@@ -37,20 +37,53 @@ export default function Home() {
       setAiSource('');
 
       try {
+        // Add timeout controller (60 seconds)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
+
         // Call AI-powered analysis API
         const response = await fetch('/api/analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ law: targetLaw, num: targetNum.trim() }),
+          signal: controller.signal,
         });
+
+        clearTimeout(timeoutId);
+
+        // Check if response is JSON before parsing
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          // Server returned HTML (error page) instead of JSON
+          console.error('Non-JSON response:', contentType, response.status);
+          // Fallback to local analysis
+          toast.loading('فشل الاتصال بالذكاء الاصطناعي، جاري التحليل المحلي...', { duration: 2000 });
+          const localData = getLocalAnalysis(targetLaw, targetNum.trim());
+          setAnalysisData(localData);
+          setAiSource('local');
+          toast.success('تم التحليل محلياً (وضع احتياطي)');
+          setTimeout(() => {
+            resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 100);
+          return;
+        }
 
         const data = await response.json();
 
         if (!response.ok || !data.ok) {
           const errorMsg = data.error || 'حدث خطأ أثناء التحليل';
-          toast.error(errorMsg);
-          setAnalysisData(null);
-          setIsLoading(false);
+
+          // If AI failed, try local fallback
+          if (response.status === 503 || response.status === 500) {
+            toast.loading('فشل الذكاء الاصطناعي، جاري التحليل المحلي...', { duration: 2000 });
+            const localData = getLocalAnalysis(targetLaw, targetNum.trim());
+            setAnalysisData(localData);
+            setAiSource('local');
+            toast.success('تم التحليل محلياً (وضع احتياطي)');
+          } else {
+            toast.error(errorMsg);
+            setAnalysisData(null);
+          }
           return;
         }
 
@@ -75,8 +108,18 @@ export default function Home() {
         }, 100);
       } catch (error) {
         console.error('Analysis error:', error);
-        toast.error('فشل الاتصال بالخادم. يرجى المحاولة لاحقاً.');
-        setAnalysisData(null);
+
+        // On any error (timeout, network, etc.), fallback to local analysis
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          toast.loading('انتهت مهلة الذكاء الاصطناعي، جاري التحليل المحلي...', { duration: 2000 });
+        } else {
+          toast.loading('فشل الاتصال بالخادم، جاري التحليل المحلي...', { duration: 2000 });
+        }
+
+        const localData = getLocalAnalysis(targetLaw, targetNum.trim());
+        setAnalysisData(localData);
+        setAiSource('local');
+        toast.success('تم التحليل محلياً (وضع احتياطي)');
       } finally {
         setIsLoading(false);
       }
@@ -123,9 +166,9 @@ export default function Home() {
       .join('\n');
     const memo = analysisData.muzakkira;
 
-    const sourceLabel = aiSource === 'gemini' ? 'Gemini AI' : aiSource === 'openai' ? 'OpenAI' : 'AI';
+    const sourceLabel = aiSource === 'ai' ? 'الذكاء الاصطناعي' : 'تحليل محلي';
 
-    const content = `المحلل القانوني المصري - تحليل بالذكاء الاصطناعي (${sourceLabel})
+    const content = `المحلل القانوني المصري - ${sourceLabel}
 =========================
 ${title}
 
@@ -190,7 +233,7 @@ ${memo}
           <div className="hidden md:flex items-center gap-2 text-xs text-gold-400/80">
             <span className="px-3 py-1 rounded-full border border-gold-500/30 flex items-center gap-1">
               <Brain className="w-3 h-3" aria-hidden="true" />
-              تحليل بالذكاء الاصطناعي - Gemini
+              تحليل بالذكاء الاصطناعي
             </span>
             <span className="px-3 py-1 rounded-full border border-gold-500/30">
               📚 {totalArticles} مادة في القاعدة
@@ -227,7 +270,7 @@ ${memo}
               <Brain className="w-8 h-8 text-gold-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
             </div>
             <p className="mt-6 text-gold-400 text-lg font-heading">جاري التحليل بالذكاء الاصطناعي...</p>
-            <p className="mt-2 text-gray-400 text-sm">يتم تحليل المادة قانونياً باستخدام Gemini AI</p>
+            <p className="mt-2 text-gray-400 text-sm">يتم تحليل المادة قانونياً - قد يستغرق بضع ثوانٍ</p>
           </div>
         ) : (
           <EmptyState />
