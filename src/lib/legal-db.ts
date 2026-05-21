@@ -31,6 +31,7 @@ export function getArticleData(law: LawType, num: string): ArticleData | null {
     mawdoo: analysis?.mawdoo || [],
     thaghra: analysis?.thaghra || [],
     naqd: analysis?.naqd || [],
+    taaleeq: analysis?.taaleeq || [],
     muzakkira: analysis?.muzakkira || '',
   };
 }
@@ -58,6 +59,7 @@ export function getLocalAnalysis(law: LawType, num: string): ArticleData {
     mawdoo: analysis?.mawdoo || [],
     thaghra: analysis?.thaghra || [],
     naqd: analysis?.naqd || [],
+    taaleeq: analysis?.taaleeq || [],
     muzakkira: analysis?.muzakkira || '',
   };
 }

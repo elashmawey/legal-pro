@@ -8,6 +8,7 @@ import { ArticleCard } from './ArticleCard';
 import { DefensesCard } from './DefensesCard';
 import { LoopholesCard } from './LoopholesCard';
 import { CassationCard } from './CassationCard';
+import { CommentCard } from './CommentCard';
 import { MemoCard } from './MemoCard';
 
 interface ResultsPanelProps {
@@ -41,6 +42,7 @@ export function ResultsPanel({
           <LoadingCard title="الدفوع الموضوعية" badgeLabel="موضوعية" />
           <LoadingCard title="الثغرات ونقاط الضعف" badgeLabel="ثغرات" />
           <LoadingCard title="مبادئ محكمة النقض" badgeLabel="نقض" />
+          <LoadingCard title="تعليقات ومصادر رسمية" badgeLabel="تعليقات" fullWidth />
           <LoadingCard title="مسودة مذكرة قانونية" badgeLabel="مذكرة" fullWidth />
         </div>
       </section>
@@ -53,6 +55,7 @@ export function ResultsPanel({
     data.mawdoo.length > 0 ||
     data.thaghra.length > 0 ||
     data.naqd.length > 0 ||
+    (data.taaleeq && data.taaleeq.length > 0) ||
     data.muzakkira.length > 0;
 
   const canExport = hasAnalysisData;
@@ -133,6 +136,18 @@ export function ResultsPanel({
             title="مبادئ محكمة النقض"
             badgeLabel="نقض"
             message="لا توجد أحكام نقض مسجلة لهذه المادة"
+          />
+        )}
+
+        {/* تعليقات ومصادر رسمية */}
+        {data.taaleeq && data.taaleeq.length > 0 ? (
+          <CommentCard items={data.taaleeq} />
+        ) : (
+          <EmptyCard
+            title="تعليقات ومصادر رسمية"
+            badgeLabel="تعليقات"
+            message="لا توجد تعليقات مسجلة لهذه المادة"
+            fullWidth
           />
         )}
 

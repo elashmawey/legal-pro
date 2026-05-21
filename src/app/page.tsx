@@ -92,6 +92,9 @@ export default function Home() {
     const naqd = analysisData.naqd
       .map((item) => `${item.ref}\n${item.text}`)
       .join('\n\n');
+    const taaleeq = (analysisData.taaleeq || [])
+      .map((item) => `• ${item}`)
+      .join('\n');
     const memo = analysisData.muzakkira;
 
     const content = `المحلل القانوني المصري
@@ -112,6 +115,9 @@ ${thaghra}
 
 [مبادئ محكمة النقض]
 ${naqd}
+
+[تعليقات ومصادر رسمية]
+${taaleeq}
 
 [مسودة المذكرة]
 ${memo}

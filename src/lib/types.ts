@@ -14,6 +14,7 @@ export interface ArticleData {
   mawdoo: string[];
   thaghra: string[];
   naqd: NaqdEntry[];
+  taaleeq: string[];
   muzakkira: string;
 }
 
