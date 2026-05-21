@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { Scale, Database } from 'lucide-react';
+import { Scale, Brain, Loader2, Wifi } from 'lucide-react';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 import { LawType, ArticleData, LAW_NAMES } from '@/lib/types';
-import { getLocalAnalysis, getDBStats } from '@/lib/legal-db';
+import { getDBStats } from '@/lib/legal-db';
 import { SearchPanel } from '@/components/legal/SearchPanel';
 import { ResultsPanel } from '@/components/legal/ResultsPanel';
 import { EmptyState } from '@/components/legal/EmptyState';
@@ -16,10 +16,11 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [analysisData, setAnalysisData] = useState<ArticleData | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [aiSource, setAiSource] = useState<string>('');
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const analyzeArticle = useCallback(
-    (targetLaw: LawType, targetNum: string) => {
+    async (targetLaw: LawType, targetNum: string) => {
       // Validate input - only need article number
       if (!targetNum.trim()) {
         toast.error('يرجى إدخال رقم المادة');
@@ -33,27 +34,52 @@ export default function Home() {
 
       setIsLoading(true);
       setHasSearched(true);
+      setAiSource('');
 
-      // Get FULL analysis directly from local library - NO API needed!
-      const data = getLocalAnalysis(targetLaw, targetNum.trim());
+      try {
+        // Call AI-powered analysis API
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ law: targetLaw, num: targetNum.trim() }),
+        });
 
-      // Small delay for UX feel
-      setTimeout(() => {
-        setAnalysisData(data);
-        setIsLoading(false);
+        const data = await response.json();
 
-        if (!data || data.text.includes('لم يتم إدراج')) {
-          const lawName = LAW_NAMES[targetLaw];
-          toast.error(`لم يتم العثور على المادة ${targetNum} من ${lawName} في قاعدة البيانات`);
-        } else {
-          toast.success('تم التحليل بنجاح من المكتبة المحلية');
+        if (!response.ok || !data.ok) {
+          const errorMsg = data.error || 'حدث خطأ أثناء التحليل';
+          toast.error(errorMsg);
+          setAnalysisData(null);
+          setIsLoading(false);
+          return;
         }
+
+        // Build ArticleData from API response
+        const articleData: ArticleData = {
+          text: data.text || `المادة ${targetNum} من ${LAW_NAMES[targetLaw]}`,
+          shakly: data.shakly || [],
+          mawdoo: data.mawdoo || [],
+          thaghra: data.thaghra || [],
+          naqd: data.naqd || [],
+          taaleeq: data.taaleeq || [],
+          muzakkira: data.muzakkira || '',
+        };
+
+        setAnalysisData(articleData);
+        setAiSource(data.source || 'ai');
+        toast.success('تم التحليل بالذكاء الاصطناعي بنجاح');
 
         // Scroll to results
         setTimeout(() => {
           resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
-      }, 300);
+      } catch (error) {
+        console.error('Analysis error:', error);
+        toast.error('فشل الاتصال بالخادم. يرجى المحاولة لاحقاً.');
+        setAnalysisData(null);
+      } finally {
+        setIsLoading(false);
+      }
     },
     []
   );
@@ -97,7 +123,9 @@ export default function Home() {
       .join('\n');
     const memo = analysisData.muzakkira;
 
-    const content = `المحلل القانوني المصري
+    const sourceLabel = aiSource === 'gemini' ? 'Gemini AI' : aiSource === 'openai' ? 'OpenAI' : 'AI';
+
+    const content = `المحلل القانوني المصري - تحليل بالذكاء الاصطناعي (${sourceLabel})
 =========================
 ${title}
 
@@ -134,7 +162,7 @@ ${memo}
     URL.revokeObjectURL(url);
 
     toast.success('تم تحميل المذكرة بنجاح');
-  }, [law, num, analysisData]);
+  }, [law, num, analysisData, aiSource]);
 
   // Get DB stats for display
   const dbStats = getDBStats();
@@ -155,14 +183,14 @@ ${memo}
                 المحلل القانوني المصري
               </h1>
               <p className="text-xs text-gray-400 hidden sm:block">
-                منصة استخراج الدفوع والثغرات وأحكام النقض
+                منصة استخراج الدفوع والثغرات وأحكام النقض بالذكاء الاصطناعي
               </p>
             </div>
           </div>
           <div className="hidden md:flex items-center gap-2 text-xs text-gold-400/80">
             <span className="px-3 py-1 rounded-full border border-gold-500/30 flex items-center gap-1">
-              <Database className="w-3 h-3" aria-hidden="true" />
-              تحليل محلي - بدون ذكاء اصطناعي
+              <Brain className="w-3 h-3" aria-hidden="true" />
+              تحليل بالذكاء الاصطناعي - Gemini
             </span>
             <span className="px-3 py-1 rounded-full border border-gold-500/30">
               📚 {totalArticles} مادة في القاعدة
@@ -193,13 +221,13 @@ ${memo}
             />
           </div>
         ) : isLoading ? (
-          <div ref={resultsRef}>
-            <ResultsPanel
-              law={law}
-              num={num}
-              data={null}
-              onExport={handleExport}
-            />
+          <div ref={resultsRef} className="flex flex-col items-center justify-center py-20">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full border-4 border-gold-500/20 border-t-gold-400 animate-spin" />
+              <Brain className="w-8 h-8 text-gold-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            </div>
+            <p className="mt-6 text-gold-400 text-lg font-heading">جاري التحليل بالذكاء الاصطناعي...</p>
+            <p className="mt-2 text-gray-400 text-sm">يتم تحليل المادة قانونياً باستخدام Gemini AI</p>
           </div>
         ) : (
           <EmptyState />
@@ -214,7 +242,7 @@ ${memo}
             ⚖️ أداة استرشادية لا تغني عن الرأي القانوني المتخصص
           </p>
           <p className="text-xs text-gray-600 mt-1">
-            © {new Date().getFullYear()} المحلل القانوني المصري
+            © {new Date().getFullYear()} المحلل القانوني المصري - مدعوم بالذكاء الاصطناعي
           </p>
         </div>
       </footer>
