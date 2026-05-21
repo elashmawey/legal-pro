@@ -88,7 +88,6 @@ function categorizeArticle(law: LawType, num: number): ArticleCategory {
     if (num >= 294 && num <= 312) return 'insult_defamation';
     if (num >= 312 && num <= 330) return 'protection';
     if (num >= 331 && num <= 343) return 'theft';
-    if (num >= 336 && num <= 340) return 'negligence';
     if (num >= 344 && num <= 360) return 'fraud';
     if (num >= 361 && num <= 381) return 'checks';
     if (num >= 382 && num <= 400) return 'fraud';
