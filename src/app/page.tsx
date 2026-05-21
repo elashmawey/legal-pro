@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Scale, Sparkles } from 'lucide-react';
+import { Scale, Database } from 'lucide-react';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 import { LawType, ArticleData, LAW_NAMES } from '@/lib/types';
@@ -85,8 +85,7 @@ export default function Home() {
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
 
-      // Call AI analysis with the ACTUAL article text
-      setIsAILoading(true);
+      // Get analysis from local library (NO AI needed!)
       try {
         const aiRes = await fetch('/api/analyze', {
           method: 'POST',
@@ -108,15 +107,15 @@ export default function Home() {
             naqd: aiJson.naqd,
             muzakkira: aiJson.muzakkira,
           });
-          toast.success('تم التحليل بالذكاء الاصطناعي بنجاح');
+          toast.success('تم التحليل بنجاح من المكتبة المحلية');
         } else {
-          const errorMsg = aiJson.error || aiJson.detail || `خطأ HTTP ${aiRes.status}`;
-          console.warn('AI analysis failed:', errorMsg);
-          toast.info('يتم عرض البيانات المحلية (تعذّر التحليل بالذكاء الاصطناعي)');
+          const errorMsg = aiJson.error || `خطأ HTTP ${aiRes.status}`;
+          console.warn('Local analysis error:', errorMsg);
+          toast.info('يتم عرض بيانات التحليل المحلي');
         }
       } catch (error) {
-        console.warn('AI analysis network error:', error);
-        toast.info('يتم عرض البيانات المحلية (خطأ في الاتصال)');
+        console.warn('Local analysis error:', error);
+        toast.info('يتم عرض بيانات التحليل المحلي');
       } finally {
         setIsAILoading(false);
       }
@@ -232,8 +231,8 @@ ${memo}
           </div>
           <div className="hidden md:flex items-center gap-2 text-xs text-gold-400/80">
             <span className="px-3 py-1 rounded-full border border-gold-500/30 flex items-center gap-1">
-              <Sparkles className="w-3 h-3" aria-hidden="true" />
-              مدعوم بالذكاء الاصطناعي
+              <Database className="w-3 h-3" aria-hidden="true" />
+              تحليل محلي - بدون ذكاء اصطناعي
             </span>
             <span className="px-3 py-1 rounded-full border border-gold-500/30">
               📚 {totalArticles} مادة في القاعدة

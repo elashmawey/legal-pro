@@ -88,7 +88,7 @@ export function ResultsPanel({
           <EmptyCard
             title="الدفوع الشكلية"
             badgeLabel="شكلية"
-            message="في انتظار التحليل بالذكاء الاصطناعي"
+            message="في انتظار التحليل من المكتبة المحلية"
           />
         ) : null}
 
@@ -107,7 +107,7 @@ export function ResultsPanel({
           <EmptyCard
             title="الدفوع الموضوعية"
             badgeLabel="موضوعية"
-            message="في انتظار التحليل بالذكاء الاصطناعي"
+            message="في انتظار التحليل من المكتبة المحلية"
           />
         ) : null}
 
@@ -120,7 +120,7 @@ export function ResultsPanel({
           <EmptyCard
             title="الثغرات ونقاط الضعف"
             badgeLabel="ثغرات"
-            message="في انتظار التحليل بالذكاء الاصطناعي"
+            message="في انتظار التحليل من المكتبة المحلية"
           />
         ) : null}
 
@@ -133,7 +133,7 @@ export function ResultsPanel({
           <EmptyCard
             title="مبادئ محكمة النقض"
             badgeLabel="نقض"
-            message="في انتظار التحليل بالذكاء الاصطناعي"
+            message="في انتظار التحليل من المكتبة المحلية"
           />
         ) : null}
 
@@ -150,7 +150,7 @@ export function ResultsPanel({
           <EmptyCard
             title="مسودة مذكرة قانونية"
             badgeLabel="مذكرة"
-            message="في انتظار التحليل بالذكاء الاصطناعي"
+            message="في انتظار التحليل من المكتبة المحلية"
             fullWidth
           />
         ) : null}
@@ -180,7 +180,7 @@ function LoadingCard({
         </span>
         <h3 className="font-bold text-gray-400">{title}</h3>
         <span className="mr-auto text-xs text-gray-500 animate-pulse">
-          ⏳ جارٍ التحليل بالذكاء الاصطناعي...
+          ⏳ جارٍ التحليل من المكتبة المحلية...
         </span>
       </div>
       <div className="p-5 space-y-3">
