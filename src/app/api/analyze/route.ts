@@ -12,7 +12,7 @@ import { ARTICLE_TEXT_DB } from '@/lib/article-store';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { law, num, text } = body;
+    const { law, num } = body;
 
     // Validate law type
     if (!law || !VALID_LAW_TYPES.includes(law as LawType)) {
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     const analysis = getFullAnalysis(law as LawType, String(num));
 
     if (!analysis) {
-      // Even if no detailed analysis, generate category-based analysis
+      // Even if no detailed analysis, return empty category-based analysis
       return NextResponse.json({
         ok: true,
         shakly: [],

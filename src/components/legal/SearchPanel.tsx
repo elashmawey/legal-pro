@@ -1,10 +1,9 @@
 'use client';
 
-import { Search, FileText } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -18,12 +17,9 @@ import { QuickExamples } from './QuickExamples';
 interface SearchPanelProps {
   law: LawType;
   num: string;
-  articleText: string;
-  isTextFromDB: boolean;
   isLoading: boolean;
   onLawChange: (law: LawType) => void;
   onNumChange: (num: string) => void;
-  onArticleTextChange: (text: string) => void;
   onAnalyze: () => void;
   onQuickExample: (law: LawType, num: string) => void;
 }
@@ -31,16 +27,13 @@ interface SearchPanelProps {
 export function SearchPanel({
   law,
   num,
-  articleText,
-  isTextFromDB,
   isLoading,
   onLawChange,
   onNumChange,
-  onArticleTextChange,
   onAnalyze,
   onQuickExample,
 }: SearchPanelProps) {
-  const canAnalyze = num.trim() && articleText.trim().length >= 10;
+  const canAnalyze = num.trim().length > 0;
 
   return (
     <section
@@ -122,40 +115,11 @@ export function SearchPanel({
         </div>
       </div>
 
-      {/* حقل إدخال نص المادة */}
-      <div className="mt-4">
-        <Label htmlFor="article-text" className="block text-sm mb-1 text-gray-300 flex items-center gap-2">
-          <FileText className="w-4 h-4" aria-hidden="true" />
-          نص المادة القانونية
-          {isTextFromDB && (
-            <span className="text-xs text-green-400 font-normal flex items-center gap-1">
-              ✓ من قاعدة البيانات
-            </span>
-          )}
-          {!isTextFromDB && num.trim() && (
-            <span className="text-xs text-amber-400 font-normal">
-              أدخل نص المادة يدوياً لتحليلها بدقة
-            </span>
-          )}
-        </Label>
-        <Textarea
-          id="article-text"
-          value={articleText}
-          onChange={(e) => onArticleTextChange(e.target.value)}
-          placeholder={
-            num.trim()
-              ? `الصق هنا نص المادة ${num} من ${LAW_NAMES[law]} لتحليلها بدقة...`
-              : 'أدخل رقم المادة أولاً، ثم الصق نصها هنا للتحليل...'
-          }
-          className="w-full bg-navy-input border-gold-500/30 text-white min-h-[120px] text-sm leading-relaxed placeholder:text-gray-500 resize-y"
-          dir="rtl"
-          aria-label="نص المادة القانونية للتحليل"
-        />
-        {articleText.trim().length > 0 && articleText.trim().length < 10 && (
-          <p className="text-xs text-amber-400 mt-1">
-            النص قصير جداً - يُرجى إدخال نص المادة كاملاً للحصول على تحليل دقيق
-          </p>
-        )}
+      {/* نص توجيهي */}
+      <div className="mt-3 text-center">
+        <p className="text-xs text-gray-400">
+          أدخل رقم المادة فقط واضغط تحليل - سيتم جلب النص والتحليل تلقائياً من قاعدة البيانات
+        </p>
       </div>
 
       <QuickExamples onSelect={onQuickExample} />

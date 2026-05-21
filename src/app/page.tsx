@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Scale, Database } from 'lucide-react';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
@@ -13,8 +13,6 @@ import { EmptyState } from '@/components/legal/EmptyState';
 export default function Home() {
   const [law, setLaw] = useState<LawType>('penal');
   const [num, setNum] = useState('');
-  const [articleText, setArticleText] = useState('');
-  const [isTextFromDB, setIsTextFromDB] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isAILoading, setIsAILoading] = useState(false);
   const [localData, setLocalData] = useState<ArticleData | null>(null);
@@ -22,27 +20,9 @@ export default function Home() {
   const [hasSearched, setHasSearched] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  // Auto-fill article text from DB when law or num changes
-  useEffect(() => {
-    if (!num.trim()) {
-      setArticleText('');
-      setIsTextFromDB(false);
-      return;
-    }
-
-    const dbText = getArticleText(law, num.trim());
-    if (dbText) {
-      setArticleText(dbText);
-      setIsTextFromDB(true);
-    } else {
-      // Only clear if the current text was from DB (don't overwrite user input)
-      setIsTextFromDB(false);
-    }
-  }, [law, num]);
-
   const analyzeArticle = useCallback(
-    async (targetLaw: LawType, targetNum: string, targetText: string) => {
-      // Validate input
+    async (targetLaw: LawType, targetNum: string) => {
+      // Validate input - only need article number
       if (!targetNum.trim()) {
         toast.error('يرجى إدخال رقم المادة');
         return;
@@ -53,31 +33,22 @@ export default function Home() {
         return;
       }
 
-      if (!targetText.trim() || targetText.trim().length < 10) {
-        toast.error('يرجى إدخال نص المادة القانونية للتحليل (10 أحرف على الأقل)');
-        return;
-      }
-
       setIsLoading(true);
       setHasSearched(true);
       setAIData(null);
 
-      // Get local data from DB if available
+      // Get local data from DB (text + analysis) - everything is automatic!
       const localDBData = getArticleData(targetLaw, targetNum.trim());
 
-      // Build the data object: always use the user-provided text as the source of truth
-      const data: ArticleData = localDBData
-        ? { ...localDBData, text: targetText.trim() }
-        : {
-            text: targetText.trim(),
-            shakly: [],
-            mawdoo: [],
-            thaghra: [],
-            naqd: [],
-            muzakkira: '',
-          };
+      if (!localDBData) {
+        const lawName = LAW_NAMES[targetLaw];
+        toast.error(`لم يتم العثور على المادة ${targetNum} من ${lawName} في قاعدة البيانات`);
+        setIsLoading(false);
+        setLocalData(null);
+        return;
+      }
 
-      setLocalData(data);
+      setLocalData(localDBData);
       setIsLoading(false);
 
       // Scroll to results
@@ -85,7 +56,8 @@ export default function Home() {
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
 
-      // Get analysis from local library (NO AI needed!)
+      // Get additional analysis from local library via API (NO AI needed!)
+      setIsAILoading(true);
       try {
         const aiRes = await fetch('/api/analyze', {
           method: 'POST',
@@ -93,7 +65,6 @@ export default function Home() {
           body: JSON.stringify({
             law: targetLaw,
             num: targetNum.trim(),
-            text: targetText.trim(),
           }),
         });
 
@@ -109,8 +80,7 @@ export default function Home() {
           });
           toast.success('تم التحليل بنجاح من المكتبة المحلية');
         } else {
-          const errorMsg = aiJson.error || `خطأ HTTP ${aiRes.status}`;
-          console.warn('Local analysis error:', errorMsg);
+          console.warn('Local analysis error:', aiJson.error);
           toast.info('يتم عرض بيانات التحليل المحلي');
         }
       } catch (error) {
@@ -124,27 +94,16 @@ export default function Home() {
   );
 
   const handleAnalyze = useCallback(() => {
-    analyzeArticle(law, num, articleText);
-  }, [law, num, articleText, analyzeArticle]);
+    analyzeArticle(law, num);
+  }, [law, num, analyzeArticle]);
 
   const handleQuickExample = useCallback(
     (selectedLaw: LawType, selectedNum: string) => {
       setLaw(selectedLaw);
       setNum(selectedNum);
-
-      // Get article text from DB for quick examples
-      const dbText = getArticleText(selectedLaw, selectedNum);
-      if (dbText) {
-        setArticleText(dbText);
-        setIsTextFromDB(true);
-      }
-
-      // Use a small timeout to let state settle, then analyze
+      // Analyze directly - no need to set article text
       setTimeout(() => {
-        const textToUse = dbText || '';
-        if (textToUse) {
-          analyzeArticle(selectedLaw, selectedNum, textToUse);
-        }
+        analyzeArticle(selectedLaw, selectedNum);
       }, 50);
     },
     [analyzeArticle]
@@ -246,12 +205,9 @@ ${memo}
         <SearchPanel
           law={law}
           num={num}
-          articleText={articleText}
-          isTextFromDB={isTextFromDB}
           isLoading={isLoading}
           onLawChange={setLaw}
           onNumChange={setNum}
-          onArticleTextChange={setArticleText}
           onAnalyze={handleAnalyze}
           onQuickExample={handleQuickExample}
         />
