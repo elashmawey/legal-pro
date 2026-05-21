@@ -5,7 +5,7 @@ import { Scale, Database } from 'lucide-react';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 import { LawType, ArticleData, LAW_NAMES } from '@/lib/types';
-import { getArticleData, getArticleText, getDBStats } from '@/lib/legal-db';
+import { getLocalAnalysis, getDBStats } from '@/lib/legal-db';
 import { SearchPanel } from '@/components/legal/SearchPanel';
 import { ResultsPanel } from '@/components/legal/ResultsPanel';
 import { EmptyState } from '@/components/legal/EmptyState';
@@ -14,14 +14,12 @@ export default function Home() {
   const [law, setLaw] = useState<LawType>('penal');
   const [num, setNum] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isAILoading, setIsAILoading] = useState(false);
-  const [localData, setLocalData] = useState<ArticleData | null>(null);
-  const [aiData, setAIData] = useState<Partial<ArticleData> | null>(null);
+  const [analysisData, setAnalysisData] = useState<ArticleData | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const analyzeArticle = useCallback(
-    async (targetLaw: LawType, targetNum: string) => {
+    (targetLaw: LawType, targetNum: string) => {
       // Validate input - only need article number
       if (!targetNum.trim()) {
         toast.error('يرجى إدخال رقم المادة');
@@ -35,60 +33,27 @@ export default function Home() {
 
       setIsLoading(true);
       setHasSearched(true);
-      setAIData(null);
 
-      // Get local data from DB (text + analysis) - everything is automatic!
-      const localDBData = getArticleData(targetLaw, targetNum.trim());
+      // Get FULL analysis directly from local library - NO API needed!
+      const data = getLocalAnalysis(targetLaw, targetNum.trim());
 
-      if (!localDBData) {
-        const lawName = LAW_NAMES[targetLaw];
-        toast.error(`لم يتم العثور على المادة ${targetNum} من ${lawName} في قاعدة البيانات`);
-        setIsLoading(false);
-        setLocalData(null);
-        return;
-      }
-
-      setLocalData(localDBData);
-      setIsLoading(false);
-
-      // Scroll to results
+      // Small delay for UX feel
       setTimeout(() => {
-        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
+        setAnalysisData(data);
+        setIsLoading(false);
 
-      // Get additional analysis from local library via API (NO AI needed!)
-      setIsAILoading(true);
-      try {
-        const aiRes = await fetch('/api/analyze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            law: targetLaw,
-            num: targetNum.trim(),
-          }),
-        });
-
-        const aiJson = await aiRes.json();
-
-        if (aiRes.ok && aiJson.ok) {
-          setAIData({
-            shakly: aiJson.shakly,
-            mawdoo: aiJson.mawdoo,
-            thaghra: aiJson.thaghra,
-            naqd: aiJson.naqd,
-            muzakkira: aiJson.muzakkira,
-          });
-          toast.success('تم التحليل بنجاح من المكتبة المحلية');
+        if (!data || data.text.includes('لم يتم إدراج')) {
+          const lawName = LAW_NAMES[targetLaw];
+          toast.error(`لم يتم العثور على المادة ${targetNum} من ${lawName} في قاعدة البيانات`);
         } else {
-          console.warn('Local analysis error:', aiJson.error);
-          toast.info('يتم عرض بيانات التحليل المحلي');
+          toast.success('تم التحليل بنجاح من المكتبة المحلية');
         }
-      } catch (error) {
-        console.warn('Local analysis error:', error);
-        toast.info('يتم عرض بيانات التحليل المحلي');
-      } finally {
-        setIsAILoading(false);
-      }
+
+        // Scroll to results
+        setTimeout(() => {
+          resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }, 300);
     },
     []
   );
@@ -101,7 +66,7 @@ export default function Home() {
     (selectedLaw: LawType, selectedNum: string) => {
       setLaw(selectedLaw);
       setNum(selectedNum);
-      // Analyze directly - no need to set article text
+      // Analyze directly
       setTimeout(() => {
         analyzeArticle(selectedLaw, selectedNum);
       }, 50);
@@ -110,31 +75,31 @@ export default function Home() {
   );
 
   const handleExport = useCallback(() => {
-    if (!localData) return;
+    if (!analysisData) return;
 
     const lawName = LAW_NAMES[law];
     const title = `المادة ${num} - ${lawName}`;
 
-    const shakly = (aiData?.shakly ?? localData.shakly)
+    const shakly = analysisData.shakly
       .map((item) => `• ${item}`)
       .join('\n');
-    const mawdoo = (aiData?.mawdoo ?? localData.mawdoo)
+    const mawdoo = analysisData.mawdoo
       .map((item) => `• ${item}`)
       .join('\n');
-    const thaghra = (aiData?.thaghra ?? localData.thaghra)
+    const thaghra = analysisData.thaghra
       .map((item) => `• ${item}`)
       .join('\n');
-    const naqd = (aiData?.naqd ?? localData.naqd)
+    const naqd = analysisData.naqd
       .map((item) => `${item.ref}\n${item.text}`)
       .join('\n\n');
-    const memo = aiData?.muzakkira ?? localData.muzakkira;
+    const memo = analysisData.muzakkira;
 
     const content = `المحلل القانوني المصري
 =========================
 ${title}
 
 [نص المادة]
-${localData.text}
+${analysisData.text}
 
 [الدفوع الشكلية]
 ${shakly}
@@ -163,7 +128,7 @@ ${memo}
     URL.revokeObjectURL(url);
 
     toast.success('تم تحميل المذكرة بنجاح');
-  }, [law, num, localData, aiData]);
+  }, [law, num, analysisData]);
 
   // Get DB stats for display
   const dbStats = getDBStats();
@@ -212,14 +177,21 @@ ${memo}
           onQuickExample={handleQuickExample}
         />
 
-        {hasSearched && localData ? (
+        {hasSearched && analysisData ? (
           <div ref={resultsRef}>
             <ResultsPanel
               law={law}
               num={num}
-              data={localData}
-              aiData={aiData}
-              isAILoading={isAILoading}
+              data={analysisData}
+              onExport={handleExport}
+            />
+          </div>
+        ) : isLoading ? (
+          <div ref={resultsRef}>
+            <ResultsPanel
+              law={law}
+              num={num}
+              data={null}
               onExport={handleExport}
             />
           </div>
